@@ -1,0 +1,25 @@
+INDEX VERSION 1.129+D:\Users\CALABRES\Projects\codemotion-spark-bot\.metadata\.plugins\org.eclipse.jdt.core
+3890676705.index
+1772137307.index
+1763995614.index
+2277669828.index
+2429456718.index
+4074318702.index
+462495900.index
+4207659929.index
+3517303933.index
+3046640023.index
+981367820.index
+3920974120.index
+1658438775.index
+3945379327.index
+888886519.index
+2292411991.index
+51178355.index
+246498896.index
+1280244118.index
+3109527723.index
+392419882.index
+2706122839.index
+3261789623.index
+3486203336.index
