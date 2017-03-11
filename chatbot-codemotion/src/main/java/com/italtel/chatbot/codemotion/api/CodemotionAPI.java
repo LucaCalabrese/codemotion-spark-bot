@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -12,23 +11,15 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.italtel.chatbot.codemotion.api.dto.ScoreDTO;
-import com.italtel.chatbot.codemotion.api.dto.TextDTO;
-import com.italtel.chatbot.codemotion.logic.entities.Question;
+import com.italtel.chatbot.codemotion.logic.dto.ScoreDTO;
+import com.italtel.chatbot.codemotion.logic.dto.TextDTO;
 import com.italtel.chatbot.codemotion.logic.entities.User;
-import com.italtel.chatbot.codemotion.logic.entities.UserAnswer;
-import com.italtel.chatbot.codemotion.logic.enums.AnswerLabel;
 import com.italtel.chatbot.codemotion.logic.service.ChatOpsServiceBean;
 import com.italtel.chatbot.codemotion.logic.service.ConfigServiceBean;
 import com.italtel.chatbot.codemotion.logic.service.GameServiceBean;
-import com.italtel.chatbot.codemotion.logic.service.QuestionServiceBean;
 import com.italtel.chatbot.codemotion.logic.service.UserServiceBean;
 
 @Path("engine")
@@ -84,29 +75,64 @@ public class CodemotionAPI {
 	@Produces(MediaType.APPLICATION_JSON)
 	public void process(TextDTO textDTO) {
 		String text = textDTO.getText();
-		String responseText = "Sorry, I don't understand.";
+		String responseText = null;
 		System.out.println("Text has come! " + text);
 		if (text != null) {
 			String normalized = text.toLowerCase().trim();
 			String userId = textDTO.getUserId();
 			if (START_LABELS.contains(normalized)) {
 				responseText = gameBean.startGame(userId, textDTO.getUsername(), textDTO.getEmail());
+				gameBean.sendResponse(textDTO, responseText);
 			} else if (ANSWER_LABELS.contains(normalized)) {
-				responseText = gameBean.processAnswer(userId, normalized);
+				User user = userBean.findUser(userId);
+				if (user != null) {
+					if ("WAITING".equals(user.getStatus())) {
+						responseText = gameBean.processAnswer(user, normalized);
+						gameBean.sendResponse(textDTO, responseText);
+						String report = gameBean.getReport(user);
+						if (report != null) {
+							// Send report
+							try {
+								Thread.sleep(5000);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							gameBean.sendResponse(textDTO, report);
+						}
+					} else if ("FINISHED".equals(user.getStatus())) {
+						if (gameBean.isGameComplete(user)) {
+							// Game completed
+							responseText = "You have already completed the game!<br>Come to **Cisco** Lab to see if you are the geek-est of Codemotion!<br>Best of luck!";
+						} else {
+							responseText = "Type **next** for the next question!";
+						}
+						gameBean.sendResponse(textDTO, responseText);
+					}
+				} else {
+					// No user
+					responseText = "Type **play** to start the game!";
+					gameBean.sendResponse(textDTO, responseText);
+				}
 			} else if (SCORE_LABELS.contains(normalized)) {
 				responseText = gameBean.getScore(userId);
+				gameBean.sendResponse(textDTO, responseText);
 				// ChatOps
 			} else if (text.startsWith("/clean")) {
 				// Clean given user
 				String cmd = new String(text);
 				String userEmail = cmd.replaceAll("/clean", "").trim();
 				responseText = chatOpsBean.cleanUserHistory(userId, userEmail);
+				gameBean.sendResponse(textDTO, responseText);
+			} else if ("/timer".equals(normalized) && userBean.isAdmin(userId)) {
+				gameBean.startTimer(userId);
+			} else if ("help".equals(normalized)) {
+				responseText = gameBean.getHelp();
+				gameBean.sendResponse(textDTO, responseText);
 			} else {
-				// Other cases
-				// NLP?
+				responseText = "Sorry, I don't understand.<br>".concat(gameBean.getHelp());
+				gameBean.sendResponse(textDTO, responseText);
 			}
-			// Send response to the user
-			sendResponse(textDTO, responseText);
 		}
 	}
 
@@ -144,19 +170,4 @@ public class CodemotionAPI {
 				.header("Access-Control-Allow-Methods", "GET").build();
 	}
 
-	public void sendResponse(TextDTO request, String responseText) {
-		System.out.println(responseText);
-		String sparkHost = configBean.getConfig("SPARK_HOST");
-		String sparkPort = configBean.getConfig("SPARK_PORT");
-		String sparkCR = configBean.getConfig("SPARK_CONTEXT_ROOT");
-		String baseURI = "http://".concat(sparkHost).concat(":").concat(sparkPort).concat(sparkCR);
-		Client client = ClientBuilder.newClient();
-		WebTarget target = client.target(baseURI + "/api/spark/messages/write");
-		TextDTO newResponse = new TextDTO(responseText);
-		newResponse.setConversationId(request.getConversationId());
-		newResponse.setTargetUsername(request.getEmail());
-		Entity<TextDTO> entity = Entity.entity(newResponse, MediaType.APPLICATION_JSON);
-		Response response = target.request().post(entity);
-		response.close(); // You should close connections!
-	}
 }

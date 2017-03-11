@@ -10,9 +10,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
 import com.italtel.chatbot.codemotion.logic.entities.User;
-import com.italtel.chatbot.codemotion.logic.entities.UserAnswer;
 import com.italtel.chatbot.codemotion.logic.entities.UserRole;
-import com.italtel.chatbot.codemotion.logic.enums.Role;
 
 @Stateless
 public class UserServiceBean {
@@ -56,12 +54,14 @@ public class UserServiceBean {
 	}
 
 	public boolean isAdmin(String userId) {
-		UserRole ur = getRole(userId);
-		Boolean admin = ur.getAdmin();
-		if (admin != null) {
-			return admin;
+		Boolean admin = false;
+		if (userId != null) {
+			UserRole ur = getRole(userId);
+			if (ur != null) {
+				admin = ur.getAdmin();
+			}
 		}
-		return false;
+		return admin;
 	}
 
 	public boolean isMarketing(String userId) {
@@ -75,11 +75,13 @@ public class UserServiceBean {
 
 	public UserRole getRole(String userId) {
 		UserRole role = null;
-		TypedQuery<UserRole> query = em.createNamedQuery("UserRole.findByUserId", UserRole.class);
-		query.setParameter("userId", userId);
-		List<UserRole> resultList = query.getResultList();
-		if (resultList != null && !resultList.isEmpty()) {
-			role = resultList.get(0);
+		if (userId != null) {
+			TypedQuery<UserRole> query = em.createNamedQuery("UserRole.findByUserId", UserRole.class);
+			query.setParameter("userId", userId);
+			List<UserRole> resultList = query.getResultList();
+			if (resultList != null && !resultList.isEmpty()) {
+				role = resultList.get(0);
+			}
 		}
 		return role;
 	}

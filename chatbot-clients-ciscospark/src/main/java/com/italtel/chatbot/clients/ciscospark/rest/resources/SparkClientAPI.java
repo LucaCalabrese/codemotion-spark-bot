@@ -14,8 +14,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import com.ciscospark.Membership;
 import com.ciscospark.Message;
 import com.ciscospark.Person;
+import com.ciscospark.Room;
 import com.italtel.chatbot.client.interfaces.ClientAPI;
 import com.italtel.chatbot.clients.ciscospark.SparkClient;
 import com.italtel.chatbot.clients.ciscospark.logic.entities.SparkConfig;
@@ -95,5 +97,19 @@ public class SparkClientAPI implements ClientAPI {
 	@Path("status")
 	public String getStatus() {
 		return "OK";
+	}
+	
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Path("rooms")
+	public Response handleNewRoom(WebhookEnvelop<Room> envelop){
+		Room room = envelop.getData();
+		System.out.println("roomId = " + room.getId());
+		TextDTO textDTO = new TextDTO();
+		textDTO.setConversationId(room.getId());
+		textDTO.setText("Welcome to the **Coolest Geek Contest**!<br>Just type **play** when you are ready!<br>"
+				+ "Type **score** anytime to view your current score, or **help** to view the complete list of commands!");
+		writeMessage(textDTO);
+		return Response.ok().build();
 	}
 }

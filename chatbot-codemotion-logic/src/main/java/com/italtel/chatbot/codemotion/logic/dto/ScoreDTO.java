@@ -1,4 +1,4 @@
-package com.italtel.chatbot.codemotion.api.dto;
+package com.italtel.chatbot.codemotion.logic.dto;
 
 import javax.xml.bind.annotation.XmlRootElement;
 

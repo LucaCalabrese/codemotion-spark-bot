@@ -1,7 +1,7 @@
 package com.italtel.chatbot.codemotion.logic.service;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -12,7 +12,7 @@ import com.italtel.chatbot.codemotion.logic.entities.BotConfig;
 @Stateless
 public class ConfigServiceBean {
 
-	private static Map<String, String> cache = new HashMap<String, String>();
+	private static Map<String, String> cache = new ConcurrentHashMap<String, String>();
 
 	@PersistenceContext(name = "chatbot-codemotion")
 	private EntityManager em;
