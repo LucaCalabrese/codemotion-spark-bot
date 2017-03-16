@@ -84,7 +84,7 @@ public class SparkClientAPI implements ClientAPI {
 		String botToken = configBean.getConfig("SPARK_BOT_TOKEN");
 		SparkClient client = new SparkClient(botToken);
 		if (textDTO.getTargetUsername() != null) {
-			client.findUser(textDTO.getTargetUsername()).write(textDTO.getText());
+			client.findUser(textDTO.getTargetUsername()).write(textDTO.getText(), textDTO.getAttachments());
 		} else if (textDTO.getConversationId() != null) {
 			client.findConversation(textDTO.getConversationId()).write(textDTO.getText());
 		} else {
@@ -98,18 +98,25 @@ public class SparkClientAPI implements ClientAPI {
 	public String getStatus() {
 		return "OK";
 	}
-	
+
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("rooms")
-	public Response handleNewRoom(WebhookEnvelop<Room> envelop){
+	public Response handleNewRoom(WebhookEnvelop<Room> envelop) {
 		Room room = envelop.getData();
 		System.out.println("roomId = " + room.getId());
 		TextDTO textDTO = new TextDTO();
 		textDTO.setConversationId(room.getId());
-		textDTO.setText("Welcome to the **Coolest Geek Contest**!<br>Just type **play** when you are ready!<br>"
-				+ "Type **score** anytime to view your current score, or **help** to view the complete list of commands!");
-		writeMessage(textDTO);
+		Client client = ClientBuilder.newClient();
+		String botToken = configBean.getConfig("SPARK_BOT_TOKEN");
+		String botHost = configBean.getConfig("BOT_HOST");
+		String botPort = configBean.getConfig("BOT_PORT");
+		String botContextRoot = configBean.getConfig("BOT_CONTEXT_ROOT");
+		String baseURI = "http://".concat(botHost).concat(":").concat(botPort).concat(botContextRoot);
+		WebTarget target = client.target(baseURI.concat("/api/engine/events/new-room"));
+		Entity<TextDTO> entity = Entity.entity(textDTO, MediaType.APPLICATION_JSON);
+		Response response = target.request().post(entity);
+		response.close(); // You should close connections!
 		return Response.ok().build();
 	}
 }

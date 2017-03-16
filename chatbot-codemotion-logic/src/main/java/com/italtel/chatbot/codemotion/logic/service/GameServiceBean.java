@@ -1,12 +1,15 @@
 package com.italtel.chatbot.codemotion.logic.service;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Resource;
+import javax.ejb.NoMoreTimeoutsException;
 import javax.ejb.Stateless;
 import javax.ejb.Timeout;
 import javax.ejb.Timer;
+import javax.ejb.TimerConfig;
 import javax.ejb.TimerService;
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
@@ -45,25 +48,37 @@ public class GameServiceBean {
 			user = userBean.addNewUser(userId, email, username);
 		}
 		if ("FINISHED".equals(user.getStatus())) {
-			Question nextQuestion = questionBean.getNextQuestion(userId);
-			if (nextQuestion != null) {
-				user.setStatus("WAITING");
-				user.setLastQuestionId(nextQuestion.getId());
-				user.setStageId(nextQuestion.getId());
+			if (user.getPhone() != null) {
+				Question nextQuestion = questionBean.getNextQuestion(userId);
 				if (nextQuestion != null) {
-					responseText = MessageUtils.buildMessage(nextQuestion.getText(), nextQuestion.getAns1(),
-							nextQuestion.getAns2(), nextQuestion.getAns3(), nextQuestion.getAns4());
-					startTimer(userId);
+					user.setStatus("WAITING");
+					user.setLastQuestionId(nextQuestion.getId());
+					user.setStageId(nextQuestion.getId());
+					if (nextQuestion != null) {
+						UserAnswer ua = questionBean.findAnswerByUserIdAndQuestionId(userId, nextQuestion.getId());
+						responseText = MessageUtils.buildMessage(ua.getSeq(), nextQuestion.getText(),
+								nextQuestion.getAns1(), nextQuestion.getAns2(), nextQuestion.getAns3(),
+								nextQuestion.getAns4());
+						startTimer(userId);
+					}
+				} else {
+					responseText = "You have already completed the game!<br>Come to **Cisco** Lab to see if you are the geek-est of Codemotion!<br>Best of luck!";
 				}
 			} else {
-				responseText = "You have already completed the game!<br>Come to **Cisco** Lab to see if you are the geek-est of Codemotion!<br>Best of luck!";
+				responseText = "Please tell me your mobile phone number so we can contact you if you are one of the winners!<br>";
+				String disclaimer = configBean.getConfig("DISCLAIMER");
+				if (disclaimer != null) {
+					responseText = responseText.concat(disclaimer);
+				}
 			}
 		} else if ("WAITING".equals(user.getStatus())) {
 			responseText = "The game has already started! The question is:<br>";
 			Integer lastQuestionId = user.getLastQuestionId();
 			Question lastQuestion = questionBean.findQuestion(lastQuestionId);
-			responseText = responseText + MessageUtils.buildMessage(lastQuestion.getText(), lastQuestion.getAns1(),
-					lastQuestion.getAns2(), lastQuestion.getAns3(), lastQuestion.getAns4()) + "<br>Hurry!";
+			UserAnswer ua = questionBean.findAnswerByUserIdAndQuestionId(userId, lastQuestionId);
+			responseText = responseText + MessageUtils.buildMessage(ua.getSeq(), lastQuestion.getText(),
+					lastQuestion.getAns1(), lastQuestion.getAns2(), lastQuestion.getAns3(), lastQuestion.getAns4())
+					+ "<br>Hurry!";
 		}
 		return responseText;
 	}
@@ -76,60 +91,69 @@ public class GameServiceBean {
 			if ("WAITING".equals(user.getStatus())) {
 				Integer lastQuestionId = user.getLastQuestionId();
 				if (lastQuestionId != null) {
-					// Stop timer
-					Timer timer = getTimerByUserId(userId);
-					long timeRemaining = timer.getTimeRemaining();
-					timer.cancel();
-					String config = configBean.getConfig("QUESTION_TIMEOUT");
-					long timeout = Long.valueOf(config);
-					Question lastQuestion = questionBean.findQuestion(lastQuestionId);
-					Integer correctAns = lastQuestion.getCorrectAns();
-					AnswerLabel correctLabel = AnswerLabel.getByValue(correctAns);
-					AnswerLabel ansLabel = AnswerLabel.getByLabel(text);
-					UserAnswer ua = questionBean.findAnswerByUserIdAndQuestionId(userId, lastQuestionId);
-					boolean correct = correctLabel != null && correctLabel.equals(ansLabel);
-					Integer score = 0;
-					if (correct) {
-						// Correct answer
-						// Convert times in seconds, rounded to 1st decimal
-						// e.g. 4569 -> 4.6
-						double timeRemainingRounded = Math.round(timeRemaining / 100.0) / 10.0;
-						double timeoutRounded = Math.round(timeout / 100.0) / 10.0;
-						// Compute score
-						score = 100 + (int) (timeRemainingRounded * 10);
-						// Pick a message
-						String msg = MessageUtils.pickCorrectMsg();
-						responseText = msg.concat("<br>You answered in ")
-								.concat(String.valueOf(timeoutRounded - timeRemainingRounded))
-								.concat(" seconds. <br>You earned **").concat(score.toString()).concat("** points!");
-					} else {
-						// Wrong answer
-						score = 0;
-						// Pick a message
-						String msg = MessageUtils.pickWrongMsg();
-						responseText = msg.concat("<br>The correct answer was: **").concat(correctLabel.name())
-								.concat("**");
-					}
-					ua.setCorrect(correct);
-					Integer ansGiven = null;
-					if (ansLabel != null) {
-						ansGiven = ansLabel.getValue();
-					}
-					ua.setAnsGiven(ansGiven);
-					ua.setAnswered(true);
-					ua.setScore(score);
-					Integer totalScore = score;
-					if (user.getTotalScore() != null) {
-						totalScore += user.getTotalScore();
-					}
-					user.setTotalScore(totalScore);
-					user.setStatus("FINISHED");
-					if (questionBean.getNextQuestion(userId) != null) {
-						responseText = responseText.concat("<br>Type **next** to continue.");
-					} else {
-						responseText = responseText.concat("<br><br>You have completed the game!");
-						responseText = responseText
-								.concat("<br><br>Give me some seconds to produce your report...<br><br>");
+					try {
+						long timeRemaining = 0;
+						// Stop timer
+						Timer timer = getTimerByUserId(userId);
+						if (timer != null) {
+							timeRemaining = timer.getTimeRemaining();
+							timer.cancel();
+						}
+						String config = configBean.getConfig("QUESTION_TIMEOUT");
+						long timeout = Long.valueOf(config);
+						Question lastQuestion = questionBean.findQuestion(lastQuestionId);
+						Integer correctAns = lastQuestion.getCorrectAns();
+						AnswerLabel correctLabel = AnswerLabel.getByValue(correctAns);
+						AnswerLabel ansLabel = AnswerLabel.getByLabel(text);
+						UserAnswer ua = questionBean.findAnswerByUserIdAndQuestionId(userId, lastQuestionId);
+						boolean correct = correctLabel != null && correctLabel.equals(ansLabel);
+						Integer score = 0;
+						if (correct) {
+							// Correct answer
+							// Convert times in seconds, rounded to 1st decimal
+							// e.g. 4569 -> 4.6
+							double timeRemainingRounded = Math.round(timeRemaining / 100.0) / 10.0;
+							double timeoutRounded = Math.round(timeout / 100.0) / 10.0;
+							// Compute score
+							score = 100 + (int) (timeRemainingRounded * 10);
+							// Pick a message
+							String msg = MessageUtils.pickCorrectMsg();
+							responseText = msg.concat("<br>You answered in ")
+									.concat(String.valueOf(timeoutRounded - timeRemainingRounded))
+									.concat(" seconds. <br>You earned **").concat(score.toString())
+									.concat("** points!");
+						} else {
+							// Wrong answer
+							score = 0;
+							// Pick a message
+							String msg = MessageUtils.pickWrongMsg();
+							responseText = msg.concat("<br>The correct answer was: **").concat(correctLabel.name())
+									.concat("**");
+						}
+						responseText = addMarketingMessage(ua, responseText);
+						ua.setCorrect(correct);
+						Integer ansGiven = null;
+						if (ansLabel != null) {
+							ansGiven = ansLabel.getValue();
+						}
+						ua.setAnsGiven(ansGiven);
+						ua.setAnswered(true);
+						ua.setScore(score);
+						Integer totalScore = score;
+						if (user.getTotalScore() != null) {
+							totalScore += user.getTotalScore();
+						}
+						user.setTotalScore(totalScore);
+						user.setStatus("FINISHED");
+						if (questionBean.getNextQuestion(userId) != null) {
+							responseText = responseText.concat("<br>Type **next** to continue.");
+						} else {
+							responseText = responseText.concat("<br><br>You have completed the game!");
+							responseText = responseText
+									.concat("<br><br>Give me some seconds to produce your report...<br><br>");
+						}
+					} catch (NoMoreTimeoutsException e) {
+						System.out.println("User: " + user.getId() + "Exception: " + e.getMessage());
 					}
 				}
 			} else {
@@ -150,8 +174,8 @@ public class GameServiceBean {
 			for (UserAnswer answer : answers) {
 				Integer qId = answer.getId().getQuestionId();
 				Question q = questionBean.findQuestion(qId);
-				String report = MessageUtils.buildReport(q.getText(), q.getAns1(), q.getAns2(), q.getAns3(),
-						q.getAns4(), q.getCorrectAns(), answer.getAnsGiven(), answer.getScore());
+				String report = MessageUtils.buildReport(answer.getSeq(), q.getText(), q.getAns1(), q.getAns2(),
+						q.getAns3(), q.getAns4(), q.getCorrectAns(), answer.getAnsGiven(), answer.getScore());
 				responseText = responseText.concat(report);
 			}
 			responseText = responseText.concat("**YOUR TOTAL SCORE IS: ").concat(user.getTotalScore().toString())
@@ -180,7 +204,8 @@ public class GameServiceBean {
 		return "Here are the things you can ask me: <br><ul><li>**play**: start the game!</li>"
 				+ "<li>**a**, **b**, **c** or **d**: answer - please don't write the full text of the answer or I will get confused!</li>"
 				+ "<li>**next**: go to the next question</li>" + "<li>**score**: view your current score</li>"
-				+ "<li>**help**: view this help again!</li>" + "</ul> " + "Beware: you have just " + timeoutInSeconds
+				+ "<li>**phone**: change your contact phone number</li>" + "<li>**help**: view this help again!</li>"
+				+ "</ul> " + "Beware: you have just " + timeoutInSeconds
 				+ " seconds to answer! The faster you are the more points you obtain!";
 	}
 
@@ -207,6 +232,7 @@ public class GameServiceBean {
 		TextDTO newResponse = new TextDTO(responseText);
 		newResponse.setConversationId(request.getConversationId());
 		newResponse.setTargetUsername(request.getEmail());
+		newResponse.setAttachments(request.getAttachments());
 		Entity<TextDTO> entity = Entity.entity(newResponse, MediaType.APPLICATION_JSON);
 		Response response = target.request().post(entity);
 		response.close(); // You should close connections!
@@ -223,7 +249,8 @@ public class GameServiceBean {
 				e.printStackTrace();
 			}
 		}
-		timerService.createTimer(duration, userId);
+		TimerConfig timerConfig = new TimerConfig(userId, false);
+		timerService.createSingleActionTimer(duration, timerConfig);
 	}
 
 	@Timeout
@@ -232,7 +259,7 @@ public class GameServiceBean {
 		// timer.cancel();
 		String userId = (String) timer.getInfo();
 		User user = userBean.findUser(userId);
-		if (user != null) {
+		if (user != null && "WAITING".equals(user.getStatus())) {
 			user.setStatus("FINISHED");
 			Integer lastQuestionId = user.getLastQuestionId();
 			UserAnswer ua = questionBean.findAnswerByUserIdAndQuestionId(userId, lastQuestionId);
@@ -242,8 +269,9 @@ public class GameServiceBean {
 			Question lastQuestion = questionBean.findQuestion(lastQuestionId);
 			Integer correctAns = lastQuestion.getCorrectAns();
 			AnswerLabel correctLabel = AnswerLabel.getByValue(correctAns);
-			String msg = "<br>Time out! You didn't answer on time!";
+			String msg = "Time out! You didn't answer on time!";
 			String responseText = msg.concat("<br>The correct answer was: **").concat(correctLabel.name()).concat("**");
+			responseText = addMarketingMessage(ua, responseText);
 			if (questionBean.getNextQuestion(userId) != null) {
 				responseText = responseText.concat("<br>Type **next** to continue.");
 			} else {
@@ -276,5 +304,30 @@ public class GameServiceBean {
 			}
 		}
 		return result;
+	}
+
+	public String addMarketingMessage(UserAnswer ua, String text) {
+		// Insert marketing message
+		String ctaQuestionNrStr = configBean.getConfig("CTA_QUESTION_NR");
+		String ctaMiddleValidityDateStr = configBean.getConfig("CTA_MIDDLE_VALIDITY_DATE");
+		if (ctaQuestionNrStr != null && ctaMiddleValidityDateStr != null) {
+			try {
+				Integer ctaQuestionNr = Integer.valueOf(ctaQuestionNrStr);
+				Long ctaMiddleValidtyDateLong = Long.valueOf(ctaMiddleValidityDateStr);
+				if (ctaQuestionNr.equals(ua.getSeq())) {
+					Date endDate = new Date(ctaMiddleValidtyDateLong);
+					Date now = new Date();
+					if (now.before(endDate)) {
+						String mktMsg = configBean.getConfig("CTA_MIDDLE_MSG");
+						if (mktMsg != null) {
+							text = text.concat("<br>").concat(mktMsg);
+						}
+					}
+				}
+			} catch (NumberFormatException e) {
+				e.printStackTrace();
+			}
+		}
+		return text;
 	}
 }

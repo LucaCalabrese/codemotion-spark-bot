@@ -23,14 +23,20 @@ public class QuestionServiceBean {
 	public Question getNextQuestion(String userId) {
 		Question question = null;
 		List<UserAnswer> resultList = findAllUserAnswers(userId);
+		int seq = Integer.MAX_VALUE;
 		for (UserAnswer ua : resultList) {
-			if (ua.getAnswered() == null || !ua.getAnswered()) {
+			if ((ua.getAnswered() == null || !ua.getAnswered()) && ua.getSeq() != null
+					&& ua.getSeq().intValue() < seq) {
 				Integer questionId = ua.getId().getQuestionId();
-				question = em.find(Question.class, questionId);
-				return question;
+				Question cur = em.find(Question.class, questionId);
+				if (cur != null) {
+					question = cur;
+					seq = ua.getSeq();
+				}
 			}
 		}
 		return question;
+
 	}
 
 	public UserAnswer findAnswerByUserIdAndQuestionId(String userId, Integer questionId) {
@@ -51,7 +57,8 @@ public class QuestionServiceBean {
 		List<Object> resultList = questionQuery.getResultList();
 		int counter = 0;
 		int stageId = 1;
-		for (Object result : resultList) {
+		for (int i = 0; i < resultList.size(); i++) {
+			Object result = resultList.get(i);
 			Integer questionId = (Integer) result;
 			UserAnswerPK uaPK = new UserAnswerPK(userId, questionId);
 			UserAnswer ua = new UserAnswer(uaPK);
@@ -59,6 +66,7 @@ public class QuestionServiceBean {
 				stageId++;
 			}
 			ua.setStageId(stageId);
+			ua.setSeq(i + 1);
 			em.merge(ua);
 			counter++;
 		}

@@ -11,6 +11,9 @@ public class ChatOpsServiceBean {
 	@Inject
 	private UserServiceBean userBean;
 
+	@Inject
+	private ConfigServiceBean configBean;
+
 	public String cleanUserHistory(String userId, String userEmail) {
 		// Clean given user
 		String responseText = null;
@@ -22,6 +25,15 @@ public class ChatOpsServiceBean {
 			} else {
 				responseText = "User not found";
 			}
+		}
+		return responseText;
+	}
+
+	public String clearCache(String userId) {
+		String responseText = null;
+		if (userBean.isAdmin(userId)) {
+			configBean.emptyCache();
+			responseText = "Cache cleared successfully.";
 		}
 		return responseText;
 	}

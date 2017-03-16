@@ -1,5 +1,7 @@
 package com.italtel.chatbot.codemotion.logic.dto;
 
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
@@ -11,6 +13,7 @@ public class TextDTO {
 	private String username;
 	private String email;
 	private String targetUsername;
+	private List<String> attachments;
 
 	public String getText() {
 		return text;
@@ -63,6 +66,14 @@ public class TextDTO {
 
 	public void setTargetUsername(String targetUsername) {
 		this.targetUsername = targetUsername;
+	}
+
+	public List<String> getAttachments() {
+		return attachments;
+	}
+
+	public void setAttachments(List<String> attachments) {
+		this.attachments = attachments;
 	}
 
 	public TextDTO() {

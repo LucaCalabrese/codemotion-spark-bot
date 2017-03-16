@@ -80,25 +80,53 @@ public class CodemotionAPI {
 		if (text != null) {
 			String normalized = text.toLowerCase().trim();
 			String userId = textDTO.getUserId();
-			if (START_LABELS.contains(normalized)) {
+			User user = userBean.findUser(userId);
+			if (user != null && user.getPhone() == null) {
+				user.setPhone(normalized);
+				String help = gameBean.getHelp();
+				responseText = "So your phone number is ".concat(normalized).concat(". Thank you!<br>").concat(help);
+				String ctaMsg = configBean.getConfig("CTA_START_MSG");
+				if (ctaMsg != null) {
+					responseText = responseText.concat("<br>" + ctaMsg);
+				}
+				gameBean.sendResponse(textDTO, responseText);
+			} else if ("phone".equals(normalized) && user != null) {
+				user.setPhone(null);
+				responseText = "What's your mobile phone number?";
+				gameBean.sendResponse(textDTO, responseText);
+			} else if (START_LABELS.contains(normalized)) {
 				responseText = gameBean.startGame(userId, textDTO.getUsername(), textDTO.getEmail());
 				gameBean.sendResponse(textDTO, responseText);
 			} else if (ANSWER_LABELS.contains(normalized)) {
-				User user = userBean.findUser(userId);
 				if (user != null) {
 					if ("WAITING".equals(user.getStatus())) {
 						responseText = gameBean.processAnswer(user, normalized);
-						gameBean.sendResponse(textDTO, responseText);
-						String report = gameBean.getReport(user);
-						if (report != null) {
-							// Send report
-							try {
-								Thread.sleep(5000);
-							} catch (InterruptedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+						if (responseText != null) {
+							gameBean.sendResponse(textDTO, responseText);
+							String report = gameBean.getReport(user);
+							if (report != null) {
+								// Send report
+								try {
+									Thread.sleep(5000);
+								} catch (InterruptedException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+								String ctaMsg = configBean.getConfig("CTA_END_MSG");
+								if (ctaMsg != null) {
+									report = report.concat(ctaMsg);
+								}
+								gameBean.sendResponse(textDTO, report);
+								// Add map
+								TextDTO mapDTO = new TextDTO("The Lab location is marked by a cross on the map!");
+								List<String> attachments = new ArrayList<String>();
+								String mapURL = configBean.getConfig("MAP_URL");
+								attachments.add(mapURL);
+								mapDTO.setAttachments(attachments);
+								mapDTO.setEmail(textDTO.getEmail());
+								mapDTO.setConversationId(textDTO.getConversationId());
+								gameBean.sendResponse(mapDTO, mapDTO.getText());
 							}
-							gameBean.sendResponse(textDTO, report);
 						}
 					} else if ("FINISHED".equals(user.getStatus())) {
 						if (gameBean.isGameComplete(user)) {
@@ -124,8 +152,9 @@ public class CodemotionAPI {
 				String userEmail = cmd.replaceAll("/clean", "").trim();
 				responseText = chatOpsBean.cleanUserHistory(userId, userEmail);
 				gameBean.sendResponse(textDTO, responseText);
-			} else if ("/timer".equals(normalized) && userBean.isAdmin(userId)) {
-				gameBean.startTimer(userId);
+			} else if ("/clearcache".equals(normalized) && userBean.isAdmin(userId)) {
+				responseText = chatOpsBean.clearCache(userId);
+				gameBean.sendResponse(textDTO, responseText);
 			} else if ("help".equals(normalized)) {
 				responseText = gameBean.getHelp();
 				gameBean.sendResponse(textDTO, responseText);
@@ -133,6 +162,19 @@ public class CodemotionAPI {
 				responseText = "Sorry, I don't understand.<br>".concat(gameBean.getHelp());
 				gameBean.sendResponse(textDTO, responseText);
 			}
+		}
+	}
+
+	@POST
+	@Path("events/new-room")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void handleNewRoomEvent(TextDTO input) {
+		TextDTO textDTO = new TextDTO();
+		textDTO.setConversationId(input.getConversationId());
+		String text = configBean.getConfig("WELCOME_MSG");
+		if (text != null) {
+			textDTO.setText(text);
+			gameBean.sendResponse(textDTO, text);
 		}
 	}
 

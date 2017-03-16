@@ -14,20 +14,20 @@ public class MessageUtils {
 			"Wrong! But I'm sure you will do better next time!", "That's not the correct answer unfortunately.",
 			"It was so close... but not correct." };
 
-	public static String buildMessage(String text, String ans1, String ans2, String ans3, String ans4) {
-		String message = "**" + text + "**" + "<br><br>";
+	public static String buildMessage(Integer seq, String text, String ans1, String ans2, String ans3, String ans4) {
+		String message = "**Q".concat(String.valueOf(seq)).concat(": ").concat(text).concat("**<br><br>");
 		String ans1Built = "A: ".concat(ans1).concat("<br>");
 		String ans2Built = "B: ".concat(ans2).concat("<br>");
 		String ans3Built = "C: ".concat(ans3).concat("<br>");
 		String ans4Built = "D: ".concat(ans4).concat("<br>");
-		String help = "<br>Type A, B, C or D";
+		String help = "<br>Type A, B, C or D<br>";
 		message = message + ans1Built + ans2Built + ans3Built + ans4Built + help;
 		return message;
 	}
 
-	public static String buildReport(String text, String ans1, String ans2, String ans3, String ans4,
+	public static String buildReport(Integer seq, String text, String ans1, String ans2, String ans3, String ans4,
 			Integer ansCorrect, Integer ansGiven, int score) {
-		String message = "**".concat(text).concat("**<br><br>");
+		String message = "**Q".concat(String.valueOf(seq)).concat(": ").concat(text).concat("**<br><br>");
 		String ans1Built = "A: ".concat(ans1);
 		String ans2Built = "B: ".concat(ans2);
 		String ans3Built = "C: ".concat(ans3);

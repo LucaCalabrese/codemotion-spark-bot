@@ -10,7 +10,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "user_answers")
 @NamedQueries({ @NamedQuery(name = "UserAnswer.findAll", query = "SELECT u FROM UserAnswer u"),
-		@NamedQuery(name = "UserAnswer.findByUserId", query = "SELECT u FROM UserAnswer u where u.id.userId = :userId") })
+		@NamedQuery(name = "UserAnswer.findByUserId", query = "SELECT u FROM UserAnswer u where u.id.userId = :userId order by u.seq asc") })
 public class UserAnswer implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -28,6 +28,8 @@ public class UserAnswer implements Serializable {
 
 	@Column(name = "stage_id")
 	private Integer stageId;
+
+	private Integer seq;
 
 	public UserAnswer() {
 	}
@@ -82,6 +84,14 @@ public class UserAnswer implements Serializable {
 
 	public void setAnswered(Boolean answered) {
 		this.answered = answered;
+	}
+
+	public Integer getSeq() {
+		return seq;
+	}
+
+	public void setSeq(Integer seq) {
+		this.seq = seq;
 	}
 
 }
