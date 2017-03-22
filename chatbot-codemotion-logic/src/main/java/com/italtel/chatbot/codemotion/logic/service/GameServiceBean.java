@@ -1,5 +1,6 @@
 package com.italtel.chatbot.codemotion.logic.service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -16,9 +17,11 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.italtel.chatbot.codemotion.logic.dto.EventDTO;
 import com.italtel.chatbot.codemotion.logic.dto.TextDTO;
 import com.italtel.chatbot.codemotion.logic.entities.Question;
 import com.italtel.chatbot.codemotion.logic.entities.User;
@@ -204,9 +207,10 @@ public class GameServiceBean {
 		return "Here are the things you can ask me: <br><ul><li>**play**: start the game!</li>"
 				+ "<li>**a**, **b**, **c** or **d**: answer - please don't write the full text of the answer or I will get confused!</li>"
 				+ "<li>**next**: go to the next question</li>" + "<li>**score**: view your current score</li>"
-				+ "<li>**phone**: change your contact phone number</li>" + "<li>**help**: view this help again!</li>"
-				+ "</ul> " + "Beware: you have just " + timeoutInSeconds
-				+ " seconds to answer! The faster you are the more points you obtain!";
+				+ "<li>**phone**: change your contact phone number</li>"
+				+ "<li>**now**: learn about the upcoming events at Codemotion!</li>"
+				+ "<li>**help**: view this help again!</li>" + "</ul> " + "Beware: you have just " + timeoutInSeconds
+				+ " seconds to answer the questions! The faster you are the more points you obtain!";
 	}
 
 	public boolean isGameComplete(User user) {
@@ -236,6 +240,21 @@ public class GameServiceBean {
 		Entity<TextDTO> entity = Entity.entity(newResponse, MediaType.APPLICATION_JSON);
 		Response response = target.request().post(entity);
 		response.close(); // You should close connections!
+	}
+
+	public String getEvents() {
+		// Gets next events at Codemotion
+		List<EventDTO> events = new ArrayList<>();
+		try {
+			String url = configBean.getConfig("EVENTS_URL");
+			Client client = ClientBuilder.newClient();
+			WebTarget target = client.target(url);
+			events = target.request().get(new GenericType<List<EventDTO>>() {
+			});
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return MessageUtils.buildEventList(events);
 	}
 
 	public void startTimer(String userId) {

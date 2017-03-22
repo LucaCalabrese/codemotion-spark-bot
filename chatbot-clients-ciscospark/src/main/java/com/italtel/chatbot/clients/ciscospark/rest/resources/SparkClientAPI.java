@@ -1,5 +1,7 @@
 package com.italtel.chatbot.clients.ciscospark.rest.resources;
 
+import java.io.IOException;
+
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -13,6 +15,10 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 
 import com.ciscospark.Membership;
 import com.ciscospark.Message;
@@ -34,6 +40,21 @@ public class SparkClientAPI implements ClientAPI {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("messages")
 	public Response handleNewMessage(WebhookEnvelop<Message> envelop) {
+		ObjectMapper mapper = new ObjectMapper();
+		// Object to JSON in String
+		try {
+			String jsonInString = mapper.writeValueAsString(envelop);
+			System.out.println(jsonInString);
+		} catch (JsonGenerationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		Message data = envelop.getData();
 		if (data != null) {

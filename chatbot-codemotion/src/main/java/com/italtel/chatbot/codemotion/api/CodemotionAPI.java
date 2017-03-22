@@ -84,7 +84,8 @@ public class CodemotionAPI {
 			if (user != null && user.getPhone() == null) {
 				user.setPhone(normalized);
 				String help = gameBean.getHelp();
-				responseText = "So your phone number is ".concat(normalized).concat(". Thank you!<br>").concat(help);
+				responseText = "So your phone number is ".concat(normalized)
+						.concat(". Thank you! Type **play** again to start with the first question!<br>").concat(help);
 				String ctaMsg = configBean.getConfig("CTA_START_MSG");
 				if (ctaMsg != null) {
 					responseText = responseText.concat("<br>" + ctaMsg);
@@ -157,6 +158,9 @@ public class CodemotionAPI {
 				gameBean.sendResponse(textDTO, responseText);
 			} else if ("help".equals(normalized)) {
 				responseText = gameBean.getHelp();
+				gameBean.sendResponse(textDTO, responseText);
+			} else if ("now".equals(normalized)) {
+				responseText = gameBean.getEvents();
 				gameBean.sendResponse(textDTO, responseText);
 			} else {
 				responseText = "Sorry, I don't understand.<br>".concat(gameBean.getHelp());

@@ -1,6 +1,9 @@
 package com.italtel.chatbot.codemotion.logic.utils;
 
 import java.util.Arrays;
+import java.util.List;
+
+import com.italtel.chatbot.codemotion.logic.dto.EventDTO;
 
 public class MessageUtils {
 
@@ -90,5 +93,47 @@ public class MessageUtils {
 
 	public static String pickWrongMsg() {
 		return pickMessage(WRONG_ANSWER_MSGS);
+	}
+
+	public static String buildEventList(List<EventDTO> events) {
+		String message = "Here are the upcoming events at Codemotion!<br><br>";
+		for (EventDTO eventDTO : events) {
+			try {
+				String summary = eventDTO.getSummary();
+				String description = eventDTO.getDescription();
+				String day = eventDTO.getBeginDay();
+				String beginTime = eventDTO.getBeginTime();
+				String endTime = eventDTO.getEndTime();
+				String duration = eventDTO.getDuration();
+				String location = eventDTO.getLocation();
+				String language = eventDTO.getLanguage();
+				String topic = eventDTO.getTopic();
+				String type = eventDTO.getType();
+				String level = eventDTO.getLevel();
+				String url = eventDTO.getUrl();
+				// Capitalize first letter
+				day = capitalize(day);
+				type = capitalize(type);
+				message = message + day + " " + beginTime + "-" + endTime + " (" + duration + ")<br>";
+				message = message + location + "<br>";
+				message = message + "<a href=\"" + url + "\">**" + summary + "**</a><br>";
+				message = message + "*" + topic + "*<br>";
+				message = message + description + "<br>";
+				message = message + "Type: " + type + "<br>";
+				message = message + "Level: " + level + "<br>";
+				message = message + "Language: " + language + "<br>";
+				message = message + "<br>";
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return message;
+	}
+
+	public static String capitalize(final String line) {
+		if (line != null && line.length() > 0) {
+			return Character.toUpperCase(line.charAt(0)) + line.substring(1);
+		}
+		return line;
 	}
 }
