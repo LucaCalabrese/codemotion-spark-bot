@@ -156,6 +156,9 @@ public class CodemotionAPI {
 			} else if ("/clearcache".equals(normalized) && userBean.isAdmin(userId)) {
 				responseText = chatOpsBean.clearCache(userId);
 				gameBean.sendResponse(textDTO, responseText);
+			} else if ("/winners".equals(normalized)) {
+				responseText = chatOpsBean.getWinners(userId);
+				gameBean.sendResponse(textDTO, responseText);
 			} else if ("help".equals(normalized)) {
 				responseText = gameBean.getHelp();
 				gameBean.sendResponse(textDTO, responseText);

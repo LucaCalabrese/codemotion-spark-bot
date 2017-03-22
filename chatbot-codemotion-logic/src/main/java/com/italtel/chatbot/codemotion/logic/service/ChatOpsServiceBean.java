@@ -1,5 +1,7 @@
 package com.italtel.chatbot.codemotion.logic.service;
 
+import java.util.List;
+
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
@@ -36,5 +38,25 @@ public class ChatOpsServiceBean {
 			responseText = "Cache cleared successfully.";
 		}
 		return responseText;
+	}
+
+	public String getWinners(String userId) {
+		if (userBean.isAdmin(userId) || userBean.isMarketing(userId)) {
+			List<User> topScorers = userBean.getTopScorers(3);
+			String winners = "And the winners are...<ol>";
+			for (User user : topScorers) {
+				String winner = "";
+				String username = user.getUsername();
+				String email = user.getEmail();
+				String phone = user.getPhone();
+				Integer totalScore = user.getTotalScore();
+				winner = "**" + username + "**" + "<br>Total score: " + totalScore + "<br>Email: " + email
+						+ "<br>Phone: " + phone;
+				winners = winners + "<li>" + winner + "</li>";
+			}
+			winners = winners + "</ol>";
+			return winners;
+		}
+		return null;
 	}
 }
