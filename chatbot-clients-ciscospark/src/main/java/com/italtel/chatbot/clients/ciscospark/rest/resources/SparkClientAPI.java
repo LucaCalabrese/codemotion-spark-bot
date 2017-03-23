@@ -16,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -33,6 +34,9 @@ import com.italtel.chatbot.clients.ciscospark.rest.dto.WebhookEnvelop;
 
 @Path("spark")
 public class SparkClientAPI implements ClientAPI {
+
+	private static final Logger LOGGER = Logger.getLogger(SparkClientAPI.class);
+
 	@Inject
 	private SparkConfigServiceBean configBean;
 
@@ -40,25 +44,9 @@ public class SparkClientAPI implements ClientAPI {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("messages")
 	public Response handleNewMessage(WebhookEnvelop<Message> envelop) {
-		ObjectMapper mapper = new ObjectMapper();
-		// Object to JSON in String
-		try {
-			String jsonInString = mapper.writeValueAsString(envelop);
-			System.out.println(jsonInString);
-		} catch (JsonGenerationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
 		Message data = envelop.getData();
 		if (data != null) {
-			System.out.println("personEmail: ".concat(data.getPersonEmail()));
+			LOGGER.debug("personEmail: ".concat(data.getPersonEmail()));
 			if (data.getPersonEmail() != null && data.getPersonEmail().endsWith("@sparkbot.io")) {
 				// Message from Bot: skip.
 				return Response.ok().build();
@@ -87,7 +75,7 @@ public class SparkClientAPI implements ClientAPI {
 				Entity<TextDTO> entity = Entity.entity(textDTO, MediaType.APPLICATION_JSON);
 				Response response = target.request().post(entity);
 				response.close(); // You should close connections!
-				System.out.println(message.getText());
+				LOGGER.debug(message.getText());
 				return Response.ok().build();
 			} else {
 				return Response.status(Status.NOT_FOUND).build();
@@ -101,7 +89,7 @@ public class SparkClientAPI implements ClientAPI {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("messages/write")
 	public Response writeMessage(TextDTO textDTO) {
-		System.out.println("reached");
+		LOGGER.debug("reached");
 		String botToken = configBean.getConfig("SPARK_BOT_TOKEN");
 		SparkClient client = new SparkClient(botToken);
 		if (textDTO.getTargetUsername() != null) {
@@ -125,7 +113,9 @@ public class SparkClientAPI implements ClientAPI {
 	@Path("rooms")
 	public Response handleNewRoom(WebhookEnvelop<Room> envelop) {
 		Room room = envelop.getData();
-		System.out.println("roomId = " + room.getId());
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("roomId = " + room.getId());
+		}
 		TextDTO textDTO = new TextDTO();
 		textDTO.setConversationId(room.getId());
 		Client client = ClientBuilder.newClient();

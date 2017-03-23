@@ -14,6 +14,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.log4j.Logger;
+
 import com.italtel.chatbot.codemotion.logic.dto.ScoreDTO;
 import com.italtel.chatbot.codemotion.logic.dto.TextDTO;
 import com.italtel.chatbot.codemotion.logic.entities.User;
@@ -25,6 +27,9 @@ import com.italtel.chatbot.codemotion.logic.service.UserServiceBean;
 @Path("engine")
 @Stateless
 public class CodemotionAPI {
+
+	// Logger
+	private static final Logger LOGGER = Logger.getLogger(CodemotionAPI.class);
 
 	// Constants
 	private static final List<String> ANSWER_LABELS = Arrays.asList("a", "b", "c", "d");
@@ -76,7 +81,7 @@ public class CodemotionAPI {
 	public void process(TextDTO textDTO) {
 		String text = textDTO.getText();
 		String responseText = null;
-		System.out.println("Text has come! " + text);
+		LOGGER.debug("Text has come! " + text);
 		if (text != null) {
 			String normalized = text.toLowerCase().trim();
 			String userId = textDTO.getUserId();
@@ -203,7 +208,7 @@ public class CodemotionAPI {
 				max = Integer.valueOf(maxStr);
 			} catch (NumberFormatException e) {
 				// Skip
-				System.out.println(e.getMessage());
+				LOGGER.error(e.getMessage(), e);
 			}
 		}
 		List<User> topScorers = userBean.getTopScorers(max);

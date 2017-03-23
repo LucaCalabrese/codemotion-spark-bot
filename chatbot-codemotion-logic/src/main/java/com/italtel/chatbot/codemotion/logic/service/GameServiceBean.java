@@ -21,6 +21,8 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.log4j.Logger;
+
 import com.italtel.chatbot.codemotion.logic.dto.EventDTO;
 import com.italtel.chatbot.codemotion.logic.dto.TextDTO;
 import com.italtel.chatbot.codemotion.logic.entities.Question;
@@ -31,6 +33,8 @@ import com.italtel.chatbot.codemotion.logic.utils.MessageUtils;
 
 @Stateless
 public class GameServiceBean {
+
+	private static final Logger LOGGER = Logger.getLogger(GameServiceBean.class);
 
 	@Resource
 	TimerService timerService;
@@ -156,7 +160,7 @@ public class GameServiceBean {
 									.concat("<br><br>Give me some seconds to produce your report...<br><br>");
 						}
 					} catch (NoMoreTimeoutsException e) {
-						System.out.println("User: " + user.getId() + "Exception: " + e.getMessage());
+						LOGGER.warn("User: " + user.getId() + "Exception: " + e.getMessage());
 					}
 				}
 			} else {
@@ -226,7 +230,7 @@ public class GameServiceBean {
 	}
 
 	public void sendResponse(TextDTO request, String responseText) {
-		System.out.println(responseText);
+		LOGGER.debug(responseText);
 		String sparkHost = configBean.getConfig("SPARK_HOST");
 		String sparkPort = configBean.getConfig("SPARK_PORT");
 		String sparkCR = configBean.getConfig("SPARK_CONTEXT_ROOT");
@@ -259,7 +263,7 @@ public class GameServiceBean {
 
 	public void startTimer(String userId) {
 		long duration = 10000;
-		System.out.println("Timer started");
+		LOGGER.debug("Timer started");
 		String config = configBean.getConfig("QUESTION_TIMEOUT");
 		if (config != null) {
 			try {
@@ -274,7 +278,7 @@ public class GameServiceBean {
 
 	@Timeout
 	public void timeout(Timer timer) {
-		System.out.println("CodemotionAPI: timeout occurred");
+		LOGGER.debug("CodemotionAPI: timeout occurred");
 		// timer.cancel();
 		String userId = (String) timer.getInfo();
 		User user = userBean.findUser(userId);

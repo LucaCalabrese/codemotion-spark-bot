@@ -3,10 +3,14 @@ package com.italtel.chatbot.clients.ciscospark.rest.dto;
 import java.net.URI;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.ciscospark.Message;
 import com.ciscospark.Spark;
 
 public class UserSpark {
+
+	private static final Logger LOGGER = Logger.getLogger(UserSpark.class);
 
 	private Spark spark;
 	private String email;
@@ -50,7 +54,7 @@ public class UserSpark {
 					URI file = new URI(attachments.get(i));
 					files[i] = file;
 				} catch (Exception e) {
-					System.out.println(e.getMessage());
+					LOGGER.error(e.getMessage(), e);
 				}
 			}
 			message.setFiles(files);
