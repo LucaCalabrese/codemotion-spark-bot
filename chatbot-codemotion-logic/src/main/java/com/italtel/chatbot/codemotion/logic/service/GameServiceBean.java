@@ -117,12 +117,12 @@ public class GameServiceBean {
 							// e.g. 4569 -> 4.6
 							double timeRemainingRounded = Math.round(timeRemaining / 100.0) / 10.0;
 							double timeoutRounded = Math.round(timeout / 100.0) / 10.0;
+							double timeSpent = Math.round((timeout - timeRemaining) / 100.0) / 10.0;
 							// Compute score
 							score = 100 + (int) (timeRemainingRounded * 10);
 							// Pick a message
 							String msg = MessageUtils.pickCorrectMsg();
-							responseText = msg.concat("<br>You answered in ")
-									.concat(String.valueOf(timeoutRounded - timeRemainingRounded))
+							responseText = msg.concat("<br>You answered in ").concat(String.valueOf(timeSpent))
 									.concat(" seconds. <br>You earned **").concat(score.toString())
 									.concat("** points!");
 						} else {
