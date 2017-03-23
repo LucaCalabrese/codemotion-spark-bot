@@ -36,4 +36,14 @@ public class ConfigServiceBean {
 		}
 	}
 
+	public void updateConfig(String key, String value) {
+		if (cache.containsKey(key)) {
+			cache.remove(key);
+		}
+		BotConfig configDB = em.find(BotConfig.class, key);
+		if (configDB != null) {
+			configDB.setValue(value);
+		}
+	}
+
 }

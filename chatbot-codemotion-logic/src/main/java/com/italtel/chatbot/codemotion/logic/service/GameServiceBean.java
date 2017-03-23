@@ -49,6 +49,11 @@ public class GameServiceBean {
 	private ConfigServiceBean configBean;
 
 	public String startGame(String userId, String username, String email) {
+		String config = configBean.getConfig("GAME_ACTIVE");
+		boolean gameActive = Boolean.parseBoolean(config);
+		if (!gameActive) {
+			return configBean.getConfig("CONTEST_FINISHED_MSG");
+		}
 		String responseText = null;
 		User user = userBean.findUser(userId);
 		if (user == null) {
@@ -91,6 +96,11 @@ public class GameServiceBean {
 	}
 
 	public String processAnswer(User user, String text) {
+		String gameConfig = configBean.getConfig("GAME_ACTIVE");
+		boolean gameActive = Boolean.parseBoolean(gameConfig);
+		if (!gameActive) {
+			return configBean.getConfig("CONTEST_FINISHED_MSG");
+		}
 		String responseText = null;
 		if (user != null) {
 			String userId = user.getId();

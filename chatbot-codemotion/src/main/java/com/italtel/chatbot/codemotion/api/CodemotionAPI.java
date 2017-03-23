@@ -104,52 +104,66 @@ public class CodemotionAPI {
 				responseText = gameBean.startGame(userId, textDTO.getUsername(), textDTO.getEmail());
 				gameBean.sendResponse(textDTO, responseText);
 			} else if (ANSWER_LABELS.contains(normalized)) {
-				if (user != null) {
-					if ("WAITING".equals(user.getStatus())) {
-						responseText = gameBean.processAnswer(user, normalized);
-						if (responseText != null) {
-							gameBean.sendResponse(textDTO, responseText);
-							String report = gameBean.getReport(user);
-							if (report != null) {
-								// Send report
-								try {
-									Thread.sleep(5000);
-								} catch (InterruptedException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
+				String gameConfig = configBean.getConfig("GAME_ACTIVE");
+				boolean gameActive = Boolean.parseBoolean(gameConfig);
+				if (gameActive) {
+					if (user != null) {
+						if ("WAITING".equals(user.getStatus())) {
+							responseText = gameBean.processAnswer(user, normalized);
+							if (responseText != null) {
+								gameBean.sendResponse(textDTO, responseText);
+								String report = gameBean.getReport(user);
+								if (report != null) {
+									// Send report
+									try {
+										Thread.sleep(5000);
+									} catch (InterruptedException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+									String ctaMsg = configBean.getConfig("CTA_END_MSG");
+									if (ctaMsg != null) {
+										report = report.concat(ctaMsg);
+									}
+									gameBean.sendResponse(textDTO, report);
+									// Add map
+									TextDTO mapDTO = new TextDTO("The Lab location is marked by a cross on the map!");
+									List<String> attachments = new ArrayList<String>();
+									String mapURL = configBean.getConfig("MAP_URL");
+									attachments.add(mapURL);
+									mapDTO.setAttachments(attachments);
+									mapDTO.setEmail(textDTO.getEmail());
+									mapDTO.setConversationId(textDTO.getConversationId());
+									gameBean.sendResponse(mapDTO, mapDTO.getText());
 								}
-								String ctaMsg = configBean.getConfig("CTA_END_MSG");
-								if (ctaMsg != null) {
-									report = report.concat(ctaMsg);
-								}
-								gameBean.sendResponse(textDTO, report);
-								// Add map
-								TextDTO mapDTO = new TextDTO("The Lab location is marked by a cross on the map!");
-								List<String> attachments = new ArrayList<String>();
-								String mapURL = configBean.getConfig("MAP_URL");
-								attachments.add(mapURL);
-								mapDTO.setAttachments(attachments);
-								mapDTO.setEmail(textDTO.getEmail());
-								mapDTO.setConversationId(textDTO.getConversationId());
-								gameBean.sendResponse(mapDTO, mapDTO.getText());
 							}
+						} else if ("FINISHED".equals(user.getStatus())) {
+							if (gameBean.isGameComplete(user)) {
+								// Game completed
+								responseText = "You have already completed the game!<br>Come to **Cisco** Lab to see if you are the geek-est of Codemotion!<br>Best of luck!";
+							} else {
+								responseText = "Type **next** for the next question!";
+							}
+							gameBean.sendResponse(textDTO, responseText);
 						}
-					} else if ("FINISHED".equals(user.getStatus())) {
-						if (gameBean.isGameComplete(user)) {
-							// Game completed
-							responseText = "You have already completed the game!<br>Come to **Cisco** Lab to see if you are the geek-est of Codemotion!<br>Best of luck!";
-						} else {
-							responseText = "Type **next** for the next question!";
-						}
+					} else {
+						// No user
+						responseText = "Type **play** to start the game!";
 						gameBean.sendResponse(textDTO, responseText);
 					}
 				} else {
-					// No user
-					responseText = "Type **play** to start the game!";
+					// Game not active
+					responseText = configBean.getConfig("CONTEST_FINISHED_MSG");
 					gameBean.sendResponse(textDTO, responseText);
 				}
 			} else if (SCORE_LABELS.contains(normalized)) {
 				responseText = gameBean.getScore(userId);
+				gameBean.sendResponse(textDTO, responseText);
+			} else if ("help".equals(normalized)) {
+				responseText = gameBean.getHelp();
+				gameBean.sendResponse(textDTO, responseText);
+			} else if ("now".equals(normalized)) {
+				responseText = gameBean.getEvents();
 				gameBean.sendResponse(textDTO, responseText);
 				// ChatOps
 			} else if (text.startsWith("/clean")) {
@@ -164,12 +178,18 @@ public class CodemotionAPI {
 			} else if ("/winners".equals(normalized)) {
 				responseText = chatOpsBean.getWinners(userId);
 				gameBean.sendResponse(textDTO, responseText);
-			} else if ("help".equals(normalized)) {
-				responseText = gameBean.getHelp();
-				gameBean.sendResponse(textDTO, responseText);
-			} else if ("now".equals(normalized)) {
-				responseText = gameBean.getEvents();
-				gameBean.sendResponse(textDTO, responseText);
+			} else if (text.startsWith("/setconf")) {
+				if (userBean.isAdmin(userId)) {
+					String cmd = new String(text);
+					String[] tokens = cmd.split(" ");
+					if (tokens.length >= 3) {
+						String key = tokens[1];
+						String value = tokens[2];
+						configBean.updateConfig(key, value);
+						responseText = "Configuration updated successfully";
+						gameBean.sendResponse(textDTO, responseText);
+					}
+				}
 			} else {
 				responseText = "Sorry, I don't understand.<br>".concat(gameBean.getHelp());
 				gameBean.sendResponse(textDTO, responseText);
