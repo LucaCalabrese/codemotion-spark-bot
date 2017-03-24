@@ -93,10 +93,10 @@ public class SparkClientAPI implements ClientAPI {
 		LOGGER.debug("reached");
 		String botToken = configBean.getConfig("SPARK_BOT_TOKEN");
 		SparkClient client = new SparkClient(botToken);
-		if (textDTO.getTargetUsername() != null) {
-			client.findUser(textDTO.getTargetUsername()).write(textDTO.getText(), textDTO.getAttachments());
-		} else if (textDTO.getConversationId() != null) {
+		if (textDTO.getConversationId() != null) {
 			client.findConversation(textDTO.getConversationId()).write(textDTO.getText());
+		} else if (textDTO.getTargetUsername() != null) {
+			client.findUser(textDTO.getTargetUsername()).write(textDTO.getText(), textDTO.getAttachments());
 		} else {
 			return Response.status(400).build();
 		}
