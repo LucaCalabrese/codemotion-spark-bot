@@ -119,4 +119,8 @@ public class UserServiceBean {
 		}
 		return users;
 	}
+
+	public int getUserCount() {
+		return ((Number) em.createNamedQuery("User.countAll").getSingleResult()).intValue();
+	}
 }

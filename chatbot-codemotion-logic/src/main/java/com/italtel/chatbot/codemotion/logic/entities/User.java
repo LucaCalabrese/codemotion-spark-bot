@@ -11,7 +11,8 @@ import javax.persistence.*;
 @Table(name = "users")
 @NamedQueries({ @NamedQuery(name = "User.findAll", query = "SELECT u FROM User u"),
 		@NamedQuery(name = "User.findByEmail", query = "SELECT u FROM User u where u.email = :email"),
-		@NamedQuery(name = "User.findTopScorers", query = "SELECT u FROM User u where u.totalScore is not null order by u.totalScore desc") })
+		@NamedQuery(name = "User.findTopScorers", query = "SELECT u FROM User u where u.totalScore is not null order by u.totalScore desc"),
+		@NamedQuery(name = "User.countAll", query = "SELECT count(u.id) from User u") })
 public class User implements Serializable {
 	private static final long serialVersionUID = 1L;
 

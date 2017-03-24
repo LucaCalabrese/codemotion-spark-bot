@@ -25,6 +25,7 @@ import com.ciscospark.Membership;
 import com.ciscospark.Message;
 import com.ciscospark.Person;
 import com.ciscospark.Room;
+import com.ciscospark.Webhook;
 import com.italtel.chatbot.client.interfaces.ClientAPI;
 import com.italtel.chatbot.clients.ciscospark.SparkClient;
 import com.italtel.chatbot.clients.ciscospark.logic.entities.SparkConfig;
@@ -118,6 +119,27 @@ public class SparkClientAPI implements ClientAPI {
 		}
 		TextDTO textDTO = new TextDTO();
 		textDTO.setConversationId(room.getId());
+		Client client = ClientBuilder.newClient();
+		String botToken = configBean.getConfig("SPARK_BOT_TOKEN");
+		String botHost = configBean.getConfig("BOT_HOST");
+		String botPort = configBean.getConfig("BOT_PORT");
+		String botContextRoot = configBean.getConfig("BOT_CONTEXT_ROOT");
+		String baseURI = "http://".concat(botHost).concat(":").concat(botPort).concat(botContextRoot);
+		WebTarget target = client.target(baseURI.concat("/api/engine/events/new-room"));
+		Entity<TextDTO> entity = Entity.entity(textDTO, MediaType.APPLICATION_JSON);
+		Response response = target.request().post(entity);
+		response.close(); // You should close connections!
+		return Response.ok().build();
+	}
+
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Path("memberships")
+	public Response handleNewMembership(WebhookEnvelop<Membership> envelop) {
+		Membership membership = envelop.getData();
+		TextDTO textDTO = new TextDTO();
+		String roomId = membership.getRoomId();
+		textDTO.setConversationId(roomId);
 		Client client = ClientBuilder.newClient();
 		String botToken = configBean.getConfig("SPARK_BOT_TOKEN");
 		String botHost = configBean.getConfig("BOT_HOST");

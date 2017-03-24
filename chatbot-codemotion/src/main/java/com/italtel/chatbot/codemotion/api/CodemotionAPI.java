@@ -190,7 +190,15 @@ public class CodemotionAPI {
 						gameBean.sendResponse(textDTO, responseText);
 					}
 				}
-			} else {
+			} else if ("/stats".equals(normalized)) {
+				if (userBean.isMarketing(userId)) {
+					int userCount = userBean.getUserCount();
+					responseText = userCount + " people are playing the game.";
+					gameBean.sendResponse(textDTO, responseText);
+				}
+			}
+
+			else {
 				responseText = "Sorry, I don't understand.<br>".concat(gameBean.getHelp());
 				gameBean.sendResponse(textDTO, responseText);
 			}
