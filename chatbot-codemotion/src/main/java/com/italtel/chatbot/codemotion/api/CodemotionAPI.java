@@ -127,7 +127,11 @@ public class CodemotionAPI {
 									}
 									gameBean.sendResponse(textDTO, report);
 									// Add map
-									TextDTO mapDTO = new TextDTO("The Lab location is marked by a cross on the map!");
+									String mapMsg = configBean.getConfig("MAP_CAPTION");
+									if (mapMsg == null) {
+										mapMsg = "caption";
+									}
+									TextDTO mapDTO = new TextDTO(mapMsg);
 									List<String> attachments = new ArrayList<String>();
 									String mapURL = configBean.getConfig("MAP_URL");
 									attachments.add(mapURL);
@@ -140,7 +144,7 @@ public class CodemotionAPI {
 						} else if ("FINISHED".equals(user.getStatus())) {
 							if (gameBean.isGameComplete(user)) {
 								// Game completed
-								responseText = "You have already completed the game!<br>Come to **Cisco** Lab to see if you are the geek-est of Codemotion!<br>Best of luck!";
+								responseText = configBean.getConfig("GAME_COMPLETED");
 							} else {
 								responseText = "Type **next** for the next question!";
 							}

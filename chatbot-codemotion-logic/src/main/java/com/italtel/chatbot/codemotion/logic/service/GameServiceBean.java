@@ -74,7 +74,7 @@ public class GameServiceBean {
 						startTimer(userId);
 					}
 				} else {
-					responseText = "You have already completed the game!<br>Come to **Cisco** Lab to see if you are the geek-est of Codemotion!<br>Best of luck!";
+					responseText = configBean.getConfig("GAME_COMPLETED");
 				}
 			} else {
 				responseText = "Please tell me your mobile phone number so we can contact you if you are one of the winners!<br>";
@@ -174,7 +174,7 @@ public class GameServiceBean {
 					}
 				}
 			} else {
-				responseText = "You have already completed the game!<br>Come to **Cisco** Lab to see if you are the geek-est of Codemotion!<br>Best of luck!";
+				responseText = configBean.getConfig("GAME_COMPLETED");
 			}
 		} else {
 			responseText = "Type **play** to start the game!";
@@ -196,8 +196,7 @@ public class GameServiceBean {
 				responseText = responseText.concat(report);
 			}
 			responseText = responseText.concat("**YOUR TOTAL SCORE IS: ").concat(user.getTotalScore().toString())
-					.concat(" POINTS**<br>")
-					.concat("Come to **Cisco** Lab to see if you are the geek-est of Codemotion!<br>");
+					.concat(" POINTS**<br>");
 		}
 		return responseText;
 	}
@@ -218,13 +217,10 @@ public class GameServiceBean {
 		String config = configBean.getConfig("QUESTION_TIMEOUT");
 		Long timeoutInMillis = Long.valueOf(config);
 		int timeoutInSeconds = (int) (timeoutInMillis / 1000);
-		return "Here are the things you can ask me: <br><ul><li>**play**: start the game!</li>"
-				+ "<li>**a**, **b**, **c** or **d**: answer - please don't write the full text of the answer or I will get confused!</li>"
-				+ "<li>**next**: go to the next question</li>" + "<li>**score**: view your current score</li>"
-				+ "<li>**phone**: change your contact phone number</li>"
-				+ "<li>**now**: learn about the upcoming events at Codemotion!</li>"
-				+ "<li>**help**: view this help again!</li>" + "</ul> " + "Beware: you have just " + timeoutInSeconds
-				+ " seconds to answer the questions! The faster you are the more points you obtain!";
+		String helpMsg = configBean.getConfig("HELP_MSG");
+		return helpMsg != null ? helpMsg
+				: "" + "Beware: you have just " + timeoutInSeconds
+						+ " seconds to answer the questions! The faster you are the more points you obtain!";
 	}
 
 	public boolean isGameComplete(User user) {
