@@ -1,7 +1,8 @@
 <center><img src="https://s3.eu-central-1.amazonaws.com/github-lucacalabrese-assets/codemotion-spark-bot/title.jpg"/></center>
 
 # Spark Bot for CODEMOTION Rome 2017
-Spark Bot for Codemotion Rome 2017
+**QuizBot** is a chatbot, built for Cisco Spark, that implements a "quiz" game. The bot asks the user a set of questions drawn randomly from a database. The user must select the correct answer among 4 possible answers (marked with A, B, C or D) within a time limit. Each correct answer is given an amount of points that is proportional to the remaining time. Wrong answers, as well as answers not given within the time limit, are given 0 points.
+This bot has been used for a contest at the international tech conference Codemotion Rome 2017 (March 24-25th 2017).
 
 ## Commands
 
@@ -24,7 +25,7 @@ All admin commands start with **/** and can be issued only by users with Admin r
 
 ### Business commands
 All business commands start with **/** and can be issued only by users with Marketing role.
-* **/winners**: Extracts the 3 best scorers.
+* **/winners**: Shows the top 3 scorers. Useful for winners extraction at the end of the contest.
 * **/stats**: Shows the total number of people registered to the contest.
 
 ## Modules description
