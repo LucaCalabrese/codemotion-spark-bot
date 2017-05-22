@@ -1,3 +1,5 @@
+<center><img src="https://s3.eu-central-1.amazonaws.com/github-lucacalabrese-assets/codemotion-spark-bot/title.jpg"/></center>
+
 # Spark Bot for CODEMOTION Rome 2017
 Spark Bot for Codemotion Rome 2017
 
