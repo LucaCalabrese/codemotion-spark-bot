@@ -6,17 +6,11 @@ Spark Bot for Codemotion Rome 2017
 ### User commands
 
 * **play**: Starts the game or goes to the next question if the game has already started.
-
 * **next**: Same as <b>play</b>.
-
 * **a / b / c / d**: Used to select an answer when prompted by the bot.
-
 * **score**: Prints the current score for the user.
-
 * **phone**: Allows to edit the user's contact phone number
-
 * **now**: Shows the list of upcoming events.
-
 * **help**: Shows the list of user commands in every step of the game.
 
 ### Admin commands
