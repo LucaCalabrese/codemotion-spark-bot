@@ -28,6 +28,29 @@ All business commands start with **/** and can be issued only by users with Mark
 * **/winners**: Shows the top 3 scorers. Useful for winners extraction at the end of the contest.
 * **/stats**: Shows the total number of people registered to the contest.
 
+## Configuration variables
+These configurations can be edited by updating the *BOT_CONFIG* table or by issuing command **/setconf** to the bot. 
+* **CONTEST_FINISHED_MSG**: Text message shown at the end of the contest.
+* **CTA_END_MSG**: Text message shown at the end of the game.
+* **CTA_MIDDLE_MSG**: Text message shown after question **CTA_QUESTION_NR**.
+* **CTA_MIDDLE_VALIDITY_DATE**: Date after which **CTA_MIDDLE_MSG** stops being shown (milliseconds since Jan 01 1970).
+* **CTA_QUESTION_NR**: Question after which the **CTA_MIDDLE_MSG** is shown.
+* **CTA_START_MSG**: Text message shown at the beginning of the game.
+* **DISCLAIMER**: Disclaimer text being shown when the user is prompted to insert his/her phone number.
+* **EVENTS_URL**: Url to get the list of upcoming events at the conference. 
+* **GAME_ACTIVE**: When the game is not active, users cannot play (true / false).
+* **GAME_COMPLETED**: Message to show when the user has already completed the game (e.g.: "You have already completed the game!").
+* **HELP_MSG**: Help message, shown with **/help** command.
+* **MAP_CAPTION**: Caption for the image shown at the end of the game.
+* **MAP_URL**: URL for the image shown at the end of the game.
+* **NUMBER_OF_STAGES**: Unused, set to 1.
+* **QUESTIONS_PER_STAGE**: Number of questions in a stage, i.e. the total number of questions.
+* **QUESTION_TIMEOUT**: Timeout for the questions (in ms).
+* **SPARK_CONTEXT_ROOT**: Context root of chatbot-clients-ciscospark application (/client).
+* **SPARK_HOST**: Host of chatbot-clients-ciscospark application (e.g. the AWS EC2 host).
+* **SPARK_PORT**: Port of chatbot-clients-ciscospark application (e.g. 8080).
+* **WELCOME_MSG**: Welcome message shown when the bot is added to a room or in a 1-1 conversation.
+
 ## Modules description
 
 ### chatbot-clients-common
