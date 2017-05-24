@@ -54,7 +54,7 @@ Installation
 * Substitute:
   * *connection-url* with the url of your database (e.g. *jdbc:postgresql://example.com/quizdb*)
   * *user-name* and *password* with the credentials used when accessing your database
-* Connect to the database and change the <a href="https://github.com/LucaCalabrese/codemotion-spark-bot#configuration-variables">configurations</a> according to your environment.
+* Connect to the database and change the [configurations](#configuration-variables) according to your environment.
 
 Commands
 --------
