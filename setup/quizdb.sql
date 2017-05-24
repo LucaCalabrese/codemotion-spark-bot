@@ -158,7 +158,7 @@ ALTER TABLE ONLY user_roles ALTER COLUMN id SET DEFAULT nextval('user_roles_id_s
 
 INSERT INTO bot_config (key, value) VALUES ('SPARK_PORT', '8080');
 INSERT INTO bot_config (key, value) VALUES ('SPARK_CONTEXT_ROOT', '/client');
-INSERT INTO bot_config (key, value) VALUES ('SPARK_HOST', 'ec2-35-160-245-208.us-west-2.compute.amazonaws.com');
+INSERT INTO bot_config (key, value) VALUES ('SPARK_HOST', '');
 INSERT INTO bot_config (key, value) VALUES ('NUMBER_OF_STAGES', '1');
 INSERT INTO bot_config (key, value) VALUES ('CTA_QUESTION_NR', '5');
 INSERT INTO bot_config (key, value) VALUES ('QUESTIONS_PER_STAGE', '10');
@@ -166,11 +166,11 @@ INSERT INTO bot_config (key, value) VALUES ('CTA_MIDDLE_VALIDITY_DATE', '1490396
 INSERT INTO bot_config (key, value) VALUES ('CTA_START_MSG', '**Join Devnet today https://developer.cisco.com/ ! The open innovation platform for developers who would like to innovate with Cisco API & technologies!**');
 INSERT INTO bot_config (key, value) VALUES ('CTA_END_MSG', '**Join Devnet today https://developer.cisco.com/ ! The open innovation platform for developers who would like to innovate with Cisco API & technologies!**');
 INSERT INTO bot_config (key, value) VALUES ('DISCLAIMER', '**We respect your privacy. The personal information provided will not be sold to third parties or used for commercial purposes. Collected data will only be used to reach the winners of the competition''s prizes**');
-INSERT INTO bot_config (key, value) VALUES ('EVENTS_URL', 'https://codemotion-rome-2017.herokuapp.com/next');
+INSERT INTO bot_config (key, value) VALUES ('EVENTS_URL', '');
 INSERT INTO bot_config (key, value) VALUES ('GAME_ACTIVE', 'true');
 INSERT INTO bot_config (key, value) VALUES ('QUESTION_TIMEOUT', '30000');
-INSERT INTO bot_config (key, value) VALUES ('MAP_URL', 'https://s3-us-west-2.amazonaws.com/cisco-partnerclub-assets/in+colaborazione.png');
-INSERT INTO bot_config (key, value) VALUES ('MAP_CAPTION', 'Grazie per aver partecipato e giocato con le soluzioni Intel Cisco!');
+INSERT INTO bot_config (key, value) VALUES ('MAP_URL', '');
+INSERT INTO bot_config (key, value) VALUES ('MAP_CAPTION', '');
 INSERT INTO bot_config (key, value) VALUES ('GAME_COMPLETED', 'You have already completed the game!');
 INSERT INTO bot_config (key, value) VALUES ('CONTEST_FINISHED_MSG', 'The contest has finished! Thanks to all participants!');
 INSERT INTO bot_config (key, value) VALUES ('HELP_MSG', 'Here are the things you can ask me: <br><ul><li>**play**: start the game!</li><li>**a**, **b**, **c** or **d**: answer - please don''t write the full text of the answer or I will get confused!</li><li>**next**: go to the next question</li><li>**score**: view your current score</li><li>**phone**: change your contact phone number</li><li>**help**: view this help again!</li></ul>');
@@ -279,7 +279,7 @@ SELECT pg_catalog.setval('questions_id_seq', 3, true);
 
 INSERT INTO spark_config (key, value) VALUES ('BOT_PORT', '8080');
 INSERT INTO spark_config (key, value) VALUES ('BOT_CONTEXT_ROOT', '/chatbot-codemotion');
-INSERT INTO spark_config (key, value) VALUES ('BOT_HOST', 'ec2-35-160-245-208.us-west-2.compute.amazonaws.com');
+INSERT INTO spark_config (key, value) VALUES ('BOT_HOST', '');
 INSERT INTO spark_config (key, value) VALUES ('SPARK_BOT_TOKEN', '');
 
 
