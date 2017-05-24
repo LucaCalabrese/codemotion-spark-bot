@@ -1,10 +1,13 @@
 <center><img src="https://s3.eu-central-1.amazonaws.com/github-lucacalabrese-assets/codemotion-spark-bot/title.jpg"/></center>
 
-# Spark Bot for CODEMOTION Rome 2017
+Spark Bot for CODEMOTION Rome 2017
+====================================
+
 **QuizBot** is a chatbot, built for Cisco Spark, that implements a "quiz" game. The bot asks the user a set of questions drawn randomly from a database. The user must select the correct answer among 4 possible answers (marked with A, B, C or D) within a time limit. Each correct answer is given an amount of points that is proportional to the remaining time. Wrong answers, as well as answers not given within the time limit, are given 0 points.
 This bot has been used for a contest at the international tech conference Codemotion Rome 2017 (March 24-25th 2017).
 
-## Commands
+Commands
+--------
 
 ### User commands
 
@@ -16,8 +19,7 @@ This bot has been used for a contest at the international tech conference Codemo
 * **now**: Shows the list of upcoming events.
 * **help**: Shows the list of user commands in every step of the game.
 
-### Admin commands
-
+### Admin commands (ChatOps)
 All admin commands start with **/** and can be issued only by users with Admin role.
 * **/clean [user's Spark email]**: Deletes all user data from the database, allowing him/her to play again (useful for testing).
 * **/clearcache**: Forces the application to reload the configuration settings from the database.
@@ -28,7 +30,34 @@ All business commands start with **/** and can be issued only by users with Mark
 * **/winners**: Shows the top 3 scorers. Useful for winners extraction at the end of the contest.
 * **/stats**: Shows the total number of people registered to the contest.
 
-## Configuration variables
+User roles
+----------
+
+* **Admin**: Users allowed to use admin commands.
+* **Marketing**: Users allowed to use business commands.
+* **Normal user**: Every user that is not included in the roles above.
+
+Users can be assigned both Admin and Marketing role. Maintainers of the bot should have both these roles.
+Roles are assigned by filling table *USER_ROLES*:
+
+<table>
+<h>
+<td>id</td>
+<td>user_id</td>
+<td>admin</td>
+<td>marketing</td>
+</h>
+<tr>
+<td>Sequence number for the row</td>
+<td>Id of the user (references <i>USERS</i> table)</td>
+<td>True/False</td>
+<td>True/False</td>
+</tr>
+</table>
+
+Configuration variables
+-----------------------
+
 These configurations can be edited by updating the *BOT_CONFIG* table or by issuing command **/setconf** to the bot. 
 * **CONTEST_FINISHED_MSG**: Text message shown at the end of the contest.
 * **CTA_END_MSG**: Text message shown at the end of the game.
@@ -51,7 +80,8 @@ These configurations can be edited by updating the *BOT_CONFIG* table or by issu
 * **SPARK_PORT**: Port of chatbot-clients-ciscospark application (e.g. 8080).
 * **WELCOME_MSG**: Welcome message shown when the bot is added to a room or in a 1-1 conversation.
 
-## Modules description
+Modules description
+-------------------
 
 ### chatbot-clients-common
 Contains common interfaces for different clients.
