@@ -170,7 +170,7 @@ INSERT INTO bot_config (key, value) VALUES ('EVENTS_URL', '');
 INSERT INTO bot_config (key, value) VALUES ('GAME_ACTIVE', 'true');
 INSERT INTO bot_config (key, value) VALUES ('QUESTION_TIMEOUT', '30000');
 INSERT INTO bot_config (key, value) VALUES ('MAP_URL', '');
-INSERT INTO bot_config (key, value) VALUES ('MAP_CAPTION', 'Grazie per aver partecipato e giocato con le soluzioni Intel Cisco!');
+INSERT INTO bot_config (key, value) VALUES ('MAP_CAPTION', '');
 INSERT INTO bot_config (key, value) VALUES ('GAME_COMPLETED', 'You have already completed the game!');
 INSERT INTO bot_config (key, value) VALUES ('CONTEST_FINISHED_MSG', 'The contest has finished! Thanks to all participants!');
 INSERT INTO bot_config (key, value) VALUES ('HELP_MSG', 'Here are the things you can ask me: <br><ul><li>**play**: start the game!</li><li>**a**, **b**, **c** or **d**: answer - please don''t write the full text of the answer or I will get confused!</li><li>**next**: go to the next question</li><li>**score**: view your current score</li><li>**phone**: change your contact phone number</li><li>**help**: view this help again!</li></ul>');
@@ -279,7 +279,7 @@ SELECT pg_catalog.setval('questions_id_seq', 3, true);
 
 INSERT INTO spark_config (key, value) VALUES ('BOT_PORT', '8080');
 INSERT INTO spark_config (key, value) VALUES ('BOT_CONTEXT_ROOT', '/chatbot-codemotion');
-INSERT INTO spark_config (key, value) VALUES ('BOT_HOST', 'ec2-35-160-245-208.us-west-2.compute.amazonaws.com');
+INSERT INTO spark_config (key, value) VALUES ('BOT_HOST', '');
 INSERT INTO spark_config (key, value) VALUES ('SPARK_BOT_TOKEN', '');
 
 
