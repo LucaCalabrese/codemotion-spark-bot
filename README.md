@@ -6,8 +6,59 @@ Spark Bot for CODEMOTION Rome 2017
 **QuizBot** is a chatbot, built for Cisco Spark, that implements a "quiz" game. The bot asks the user a set of questions drawn randomly from a database. The user must select the correct answer among 4 possible answers (marked with A, B, C or D) within a time limit. Each correct answer is given an amount of points that is proportional to the remaining time. Wrong answers, as well as answers not given within the time limit, are given 0 points.
 This bot has been used for a contest at the international tech conference Codemotion Rome 2017 (March 24-25th 2017).
 
+Installation
+------------
+### Application Server
+* Download and install <a href="http://wildfly.org/downloads/">Wildfly 10.1.0.Final</a>
+
+### Database connection
+* Download and install <a href="https://www.postgresql.org/download/">PostgreSQL 9.6</a>.
+* Create a new database (through PGAdmin or CLI).
+* Run script quizdb.sql (in *setup* folder) to create all the tables.
+* Download <a href="https://jdbc.postgresql.org/download.html">PostgreSQL JDBC driver</a> (v 9.4.1212).
+* Copy postgresql-9.4.1212.jar into folder *WILDFLY_HOME/modules/system/layers/base/org/postgresql/main*, where *WILDFLY_HOME* is the path of the Wildfly root directory.
+* In the above folder insert *module.xml*.
+* Make a backup copy of file *WILDFLY_HOME/standalone/configuration/standalone.xml*
+* Copy the provided *standalone.xml* into folder *WILDFLY_HOME/standalone/configuration*
+* Open the new *standalone.xml* and reach the following lines:
+```xml
+<subsystem xmlns="urn:jboss:domain:datasources:4.0">
+	<datasources>
+		<datasource jndi-name="java:jboss/datasources/ExampleDS" pool-name="ExampleDS" enabled="true" use-java-context="true">
+			<connection-url>jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE</connection-url>
+			<driver>h2</driver>
+			<security>
+				<user-name>sa</user-name>
+				<password>sa</password>
+			</security>
+		</datasource>
+		<datasource jta="true" jndi-name="java:jboss/datasources/quizdb" pool-name="quizdb" enabled="true" use-java-context="true">
+			<connection-url>connection-url</connection-url>
+			<driver>postgresql</driver>
+			<security>
+				<user-name>user-name</user-name>
+				<password>password</password>
+			</security>
+		</datasource>
+		<drivers>
+			<driver name="h2" module="com.h2database.h2">
+				<xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
+			</driver>
+			<driver name="postgresql" module="org.postgresql">
+				<xa-datasource-class>org.postgresql.xa.PGXADataSource</xa-datasource-class>
+			</driver>
+		</drivers>
+	</datasources>
+</subsystem>
+```
+* Substitute:
+  * *connection-url* with the url of your database (e.g. *jdbc:postgresql://example.com/quizdb*)
+  * *user-name* and *password* with the credentials used when accessing your database
+* Connect to the database and change the <a href="https://github.com/LucaCalabrese/codemotion-spark-bot#configuration-variables">configurations</a> according to your environment.
+
 Commands
 --------
+This is the list of commands that can be given to **QuizBot** through the Cisco Spark interface.
 
 ### User commands
 
@@ -38,7 +89,7 @@ User roles
 * **Normal user**: Every user that is not included in the roles above.
 
 Users can be assigned both Admin and Marketing role. Maintainers of the bot should have both these roles.
-Roles are assigned by filling table *USER_ROLES*:
+Roles can be assigned by filling table *USER_ROLES*:
 
 <table>
 <h>
@@ -79,6 +130,12 @@ These configurations can be edited by updating the *BOT_CONFIG* table or by issu
 * **SPARK_HOST**: Host of chatbot-clients-ciscospark application (e.g. the AWS EC2 host).
 * **SPARK_PORT**: Port of chatbot-clients-ciscospark application (e.g. 8080).
 * **WELCOME_MSG**: Welcome message shown when the bot is added to a room or in a 1-1 conversation.
+
+These configurations can be edited by updating the *SPARK_CONFIG* table.
+* **BOT_CONTEXT_ROOT**: Context root of chatbot-clients-ciscospark application (/chatbot-codemotion).
+* **BOT_HOST**: Host of chatbot-codemotion application (e.g. the AWS EC2 host).
+* **BOT_PORT**: Port of chatbot-codemotion application (e.g. 8080).
+* **SPARK_BOT_TOKEN**: Spark token of the bot.
 
 Modules description
 -------------------
