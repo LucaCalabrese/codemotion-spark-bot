@@ -141,7 +141,7 @@ These configurations can be edited by updating the *SPARK_CONFIG* table.
 * **BOT_CONTEXT_ROOT**: Context root of chatbot-clients-ciscospark application (/chatbot-codemotion).
 * **BOT_HOST**: Host of chatbot-codemotion application (e.g. the AWS EC2 host).
 * **BOT_PORT**: Port of chatbot-codemotion application (e.g. 8080).
-* **SPARK_BOT_TOKEN**: Spark token of the bot.
+* **SPARK_BOT_TOKEN**: Spark token of the bot. Refer to [Spark for Devs site](https://developer.ciscospark.com/add-bot.html) for the creation of a Spark bot.
 
 Modules description
 -------------------
