@@ -5,6 +5,7 @@ Spark Bot for CODEMOTION Rome 2017
 
 **QuizBot** is a chatbot, built for Cisco Spark, that implements a "quiz" game. The bot asks the user a set of questions drawn randomly from a database. The user must select the correct answer among 4 possible answers (marked with A, B, C or D) within a time limit. Each correct answer is given an amount of points that is proportional to the remaining time. Wrong answers, as well as answers not given within the time limit, are given 0 points.
 This bot has been used for a contest at the international tech conference Codemotion Rome 2017 (March 24-25th 2017).
+The best scores were shown on a monitor. [Here](https://github.com/LucaCalabrese/codemotion-spark-bot-scores) you can find the code used for the ranking page.
 
 Installation
 ------------
