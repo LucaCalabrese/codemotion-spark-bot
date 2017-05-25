@@ -56,6 +56,11 @@ Installation
   * *user-name* and *password* with the credentials used when accessing your database
 * Connect to the database and change the [configurations](#configuration-variables) according to your environment.
 
+### Deployment
+After building sources, choose one of the following:
+* Deploy both .war files (*chatbot-clients-ciscospark.war* and *chatbot-codemotion.war*) through the Administration Console of Wildfly.
+* Copy both .war files in folder WILDFLY_HOME/standalone/deployments.
+
 Commands
 --------
 This is the list of commands that can be given to **QuizBot** through the Cisco Spark interface.
